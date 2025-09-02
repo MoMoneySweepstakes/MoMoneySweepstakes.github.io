@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+/>
+  <title>GALAXY WORLD  Cash prize mobile gaming app </title>
+  <meta name="description" content="MoMoneySweeps presents GALAXY WORLD cash prize mobile gaming app. Download for iOS or Android." />
+  <meta name="theme-color" content="#0b0f1a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Futuristic headline + clean body font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ===============  DESIGN TOKENS  =============== */
+    :root{
+      --bg: #05060d;
+      --bg-2: #0b0f1a;
+      --text: #e7f0ff;
+      --muted: #a7b4d6;
+      --neon-cyan: #00ffff;
+      --neon-pink: #ff3df3;
+      --neon-purple: #8a5cff;
+      --glass: rgba(255,255,255,0.06);
+      --glass-hr: rgba(255,255,255,0.08);
+      --maxw: 1200px;
+      --ring: 0 0 32px 4px rgba(0,255,255,0.12), 0 0 64px 12px rgba(138,92,255,0.08);
+    }
+
+    /* ===============  RESET  =============== */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 10% -10%, rgba(0, 255, 255, 0.07), transparent 60%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(255, 61, 243, 0.06), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+      font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+
+    /* ===============  LAYERS  =============== */
+    #starsCanvas{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      z-index:-2;
+      background: radial-gradient(1200px 700px at 10% -10%, rgba(0, 255, 255, 0.05), transparent 60%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(255, 61, 243, 0.05), transparent 50%),
+                  var(--bg);
+    }
+    .nebula{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:-1;
+      mix-blend-mode:screen;
+      opacity:.45;
+      filter: blur(60px) saturate(130%);
+      background:
+        radial-gradient(800px 600px at 15% 30%, rgba(0, 208, 255, .25), transparent 70%),
+        radial-gradient(900px 700px at 80% 20%, rgba(153, 84, 255, .20), transparent 70%),
+        radial-gradient(700px 500px at 65% 75%, rgba(255, 61, 243, .18), transparent 70%);
+      transition: opacity .6s ease;
+    }
+
+    /* Planets (pure CSS, parallax via JS) */
+    .planet{
+      position:absolute;
+      border-radius:50%;
+      filter: drop-shadow(0 0 18px rgba(0,0,0,.4));
+      will-change: transform;
+    }
+    .planet.blue{
+      width:240px;height:240px;top:8%;left:8%;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,255,255,.35), transparent 35%),
+        radial-gradient(120px 120px at 60% 60%, rgba(255,255,255,.12), transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(0,255,255,.45), rgba(0,95,255,.25) 40%, rgba(0,0,60,.8) 70%);
+      box-shadow: inset -30px -40px 80px rgba(0,0,0,.35), 0 0 80px rgba(0,195,255,.18);
+    }
+    .planet.purple{
+      width:160px;height:160px;bottom:10%;right:10%;
+      background:
+        radial-gradient(circle at 40% 40%, rgba(255,255,255,.35), transparent 35%),
+        radial-gradient(90px 90px at 70% 70%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(255,61,243,.45), rgba(138,92,255,.35) 40%, rgba(40,0,60,.9) 70%);
+      box-shadow: inset -20px -30px 70px rgba(0,0,0,.4), 0 0 80px rgba(255,61,243,.15);
+    }
+    .ring{
+      position:absolute;inset:0;border-radius:50%;
+      background: conic-gradient(from 0deg, rgba(255,255,255,.0), rgba(255,255,255,.35), rgba(255,255,255,.0));
+      filter: blur(6px) opacity(.75);
+      transform: rotateX(65deg) scale(1.4);
+    }
+
+    /* ===============  CONTENT  =============== */
+    .wrap{
+      position:relative;
+      max-width:var(--maxw);
+      margin:0 auto;
+      padding: clamp(18px, 2.5vw, 32px);
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding-top:12px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-weight:800;
+      font-family:"Orbitron", system-ui;
+      font-size:clamp(14px, 1.6vw, 16px);
+      color:var(--text);
+      text-shadow: 0 0 14px rgba(0,255,255,.35);
+    }
+    .brand .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #fff, #89f7ff 30%, #00c8ff 60%, transparent 70%);
+      box-shadow: 0 0 16px 6px rgba(0,255,255,.35);
+    }
+    .contact{
+      display:flex;gap:12px;align-items:center;
+      font-size:14px;color:var(--muted);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:999px;
+      padding:8px 12px;
+      backdrop-filter: blur(8px);
+    }
+    .contact .pill{
+      color:var(--text);
+      font-weight:600;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap: clamp(18px, 5vw, 56px);
+      align-items:center;
+      padding: clamp(28px, 8vw, 96px) 0;
+    }
+    @media (max-width:920px){
+      .hero{grid-template-columns:1fr}
+    }
+
+    .card{
+      position:relative;
+      background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.03));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:24px;
+      padding: clamp(18px, 3vw, 28px);
+      overflow:hidden;
+      backdrop-filter: blur(10px) saturate(120%);
+      box-shadow: var(--ring);
+    }
+    .card::before{
+      content:"";
+      position:absolute;inset:-2px;
+      border-radius:inherit;
+      background: conic-gradient(from 180deg, rgba(0,255,255,.15), rgba(138,92,255,.15), rgba(255,61,243,.15), rgba(0,255,255,.15));
+      filter: blur(28px);
+      opacity:.35;
+      z-index:-1;
+    }
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+      color:#bfeaff;
+      padding:8px 12px;border-radius:999px;
+      background: linear-gradient(180deg, rgba(0,255,255,.18), rgba(0,255,255,.06));
+      border:1px solid rgba(0,255,255,.35);
+      text-shadow: 0 0 8px rgba(0,255,255,.65);
+      box-shadow: 0 4px 32px rgba(0,255,255,.12) inset;
+    }
+    .title{
+      font-family:"Orbitron", system-ui;
+      font-weight:800;
+      line-height:1.02;
+      font-size:clamp(38px, 6vw, 92px);
+      letter-spacing:.02em;
+      margin:16px 0 8px;
+      background: linear-gradient(90deg, #fff 0%, #aaf7ff 40%, #b49cff 60%, #ff9cf9 85%);
+      -webkit-background-clip:text;background-clip:text;
+      color:transparent;
+      text-shadow:
+        0 0 24px rgba(0,255,255,.22),
+        0 0 48px rgba(138,92,255,.18);
+    }
+    .subtitle{
+      font-size:clamp(16px, 2.2vw, 20px);
+      color:#dfe8ff;
+      opacity:.9;
+      margin:0 0 20px 0;
+    }
+    .byline{
+      font-size:14px;color:var(--muted);margin-bottom:24px
+    }
+
+    .cta{
+      display:inline-flex;align-items:center;gap:12px;
+      padding:16px 22px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:
+        radial-gradient(120px 60px at 20% 20%, rgba(255,255,255,.25), transparent 40%),
+        linear-gradient(180deg, rgba(138,92,255,.25), rgba(0,255,255,.25));
+      box-shadow:
+        0 8px 28px rgba(0,255,255,.18),
+        inset 0 0 22px rgba(255,255,255,.12);
+      color:#001018;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-family:"Orbitron", system-ui;
+      cursor:pointer;
+      transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+      will-change: transform;
+    }
+    .cta:hover{ transform: translateY(-2px) scale(1.02); filter: saturate(115%); }
+    .cta:active{ transform: translateY(1px) scale(.99); }
+    .cta .sparkle{
+      width:14px;height:14px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #fff 0 35%, #00e8ff 36% 60%, transparent 61%);
+      box-shadow:0 0 18px 6px rgba(0,255,255,.6), 0 0 28px 12px rgba(255,61,243,.25);
+    }
+
+    .download-btn {
+  display: inline-block;
+  padding: 20px 50px;  /* makes it big */
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 50px;
+  background: linear-gradient(45deg, #ff9900, #ffcc33); /* yellow-orange */
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.8), 
+              0 0 40px rgba(255, 200, 0, 0.6);
+
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hover effect */
+.download-btn:hover {
+  background: linear-gradient(45deg, #ffcc33, #ff9900);
+  box-shadow: 0 0 30px rgba(255, 200, 0, 1), 
+              0 0 60px rgba(255, 150, 0, 0.9);
+  transform: scale(1.05);
+}
+
+
+    .features{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:16px;margin-top:24px
+    }
+    @media (max-width:920px){ .features{grid-template-columns:1fr} }
+    .feature{
+      padding:16px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    }
+    .feature h3{
+      margin:0 0 6px 0;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#cfe6ff
+    }
+    .feature p{margin:0;color:#c5d2f0;font-size:14px}
+
+    .phoneMock{
+      aspect-ratio: 9/19.5;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:36px;
+      background:
+        radial-gradient(240px 140px at 30% 10%, rgba(255,255,255,.2), transparent 60%),
+        linear-gradient(180deg, rgba(12,18,38,.9), rgba(5,6,13,.9));
+      box-shadow: inset 0 0 0 10px rgba(255,255,255,.06), 0 40px 80px rgba(0,0,0,.5), var(--ring);
+      position:relative;
+      overflow:hidden;
+    }
+    .phoneMock .uiStripe{
+      position:absolute;left:-20%;top:15%;width:140%;height:70%;
+      background: linear-gradient(100deg, rgba(0,255,255,.12), rgba(138,92,255,.12), rgba(255,61,243,.12));
+      transform:skewY(-12deg);
+      filter: blur(20px);
+      animation: float 8s ease-in-out infinite;
+    }
+    .phoneMock .stars{
+      position:absolute;inset:0;background:
+        radial-gradient(2px 2px at 70% 20%, rgba(255,255,255,.8), transparent 40%),
+        radial-gradient(2px 2px at 30% 60%, rgba(255,255,255,.5), transparent 40%),
+        radial-gradient(1px 1px at 80% 80%, rgba(255,255,255,.7), transparent 40%);
+      opacity:.55;
+      animation: twinkle 3.5s ease-in-out infinite alternate;
+    }
+    .phoneMock .title{
+      font-size: clamp(18px, 3vw, 28px);
+      margin:18px;
+    }
+
+    .footer{
+      margin:40px auto 28px auto;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .hr{
+      height:1px;background:linear-gradient(90deg, transparent, var(--glass-hr), transparent);
+      margin:18px 0;
+    }
+
+    /* ===============  ACCESSIBILITY & MOTION  =============== */
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0
+    }
+    @keyframes twinkle{
+      from{opacity:.35;transform:translateY(0)}
+      to{opacity:.7;transform:translateY(-2px)}
+    }
+    @keyframes float{
+      0%{ transform: skewY(-12deg) translateY(0) }
+      50%{ transform: skewY(-12deg) translateY(-8px) }
+      100%{ transform: skewY(-12deg) translateY(0) }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important; transition:none !important}
+      .nebula{opacity:.25}
+    }
+  </style>
+</head>
+<body>
+  <!-- =========================================================
+       ✨ EDITABLE CONTENT (look for ⬅️ markers in comments)
+       - App name, tagline, phone, links
+       - Colors and fonts in :root if desired
+  ========================================================== -->
+
+  <!-- Parallax starfield background -->
+  <canvas id="starsCanvas" aria-hidden="true"></canvas>
+  <div class="nebula" aria-hidden="true"></div>
+
+  <!-- Decorative parallax planets -->
+  <div class="planet blue" data-depth="0.15" aria-hidden="true"><span class="ring"></span></div>
+  <div class="planet purple" data-depth="0.25" aria-hidden="true"><span class="ring"></span></div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand" aria-label="MoMoneySweeps">
+        <span class="dot" aria-hidden="true"></span>
+        <span> Text-Me-4-$$$Tag </span> <!-- ⬅️ EDIT: Your name -->
+      </div>
+
+      <div class="contact" aria-label="Phone">
+        <span>📞</span>
+        <!-- ⬅️ EDIT: Your phone -->
+        <span class="pill">1+(843)-474-8911</span>
+      </div>
+    </header>
+
+    <main class="hero" id="home">
+      <section class="card">
+        <h1 class="title">  GALAXY-WORLD-999 </h1>
+        <span class="tag">Mosweeps Teams up with Galaxy World </span> <!-- ⬅️ EDIT: Tagline -->
+        <h1 class="title"></h1></h1> <!-- ⬅️ EDIT: App name -->
+        <p class="subtitle">
+           **cash in & Cash out anytime 24Hr **
+        </p>
+        <p class="byline">
+          Created by <strong>MoMoneySweeps</strong>
+        </p>
+           
+        <div class="hr"></div>
+
+        <div class="features" aria-label="Highlights">
+          <div class="feature">
+            <h3>More 'SKILL' Slots</h3>
+            <p>Skill-first games with transparent leaderboards and anti-cheat.</p>
+          </div>
+          <div class="feature">
+            <h3>HIGHEST PAYOUTS</h3>
+            <p>No other platform Pays the same way MoSweeps.</p>
+          </div>
+          <div class="feature">
+            <h3>Bonuses + Referals + Winning Percent </h3>
+            <p> Speedy Bonuses, Referal Bonuses, Plus More WINNERS!!</p>
+          </div>
+        </div>      
+      </section>
+
+
+      
+<section class="card">
+        <img src="assets/galaxyworld_image.png" alt="promotional postcard" style="max-width: 300px; display:flyer; margin-bottom:20px;" />
+      </section>      
+    </main>
+
+<a href="#" class="download-btn">Download the App</a>
+
+
+    <footer class="footer">
+      <div>© <span id="year"></span> MoMoneySweeps. All rights reserved.</div>
+    </footer>
+  </div>
+
+  <!-- Download routes dialog (single CTA -> dual platform choice) -->
+  <dialog id="downloadDialog" aria-labelledby="downloadTitle">
+    <style>
+      dialog{
+        border:none;
+        border-radius:18px;
+        padding:0;
+        color:var(--text);
+        background: linear-gradient(180deg, rgba(15,20,40,.92), rgba(7,9,20,.92));
+        border:1px solid rgba(255,255,255,.12);
+        box-shadow: 0 40px 120px rgba(0,0,0,.6), var(--ring);
+        max-width:420px;width:92%;
+      }
+      .dlgWrap{padding:18px 18px 12px 18px}
+      .dlgHead{
+        display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px
+      }
+      .title {
+  font-size: clamp(2.5rem, 8vw, 6rem); /* responsive big text */
+  font-family: 'Orbitron', sans-serif; /* futuristic font (Google Fonts) */
+  color: #fff;
+  text-align: center;
+  letter-spacing: 4px;
+
+  /* Starry glow effect */
+  text-shadow: 
+    0 0 5px #fff,
+    0 0 10px #0ff,
+    0 0 20px #0ff,
+    0 0 40px #08f,
+    0 0 80px #08f,
+    0 0 100px #4ff;
+
+  animation: starPulse 3s infinite alternate;
+}
+
+      .dlgTitle{
+        font-family:"Orbitron";letter-spacing:.14em;text-transform:uppercase;font-size:14px;color:#cfe6ff
+      }
+      .dlgGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+      .store{
+        display:flex;gap:12px;align-items:center;justify-content:center;
+        padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);
+        background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+        font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:12px;
+      }
+      .store:focus{outline:2px solid var(--neon-cyan);outline-offset:2px}
+      .closeBtn{
+        appearance:none;border:none;background:transparent;color:#cfe6ff;font-size:28px;line-height:1;cursor:pointer
+      }
+      ::backdrop{background:rgba(0,0,0,.6)}
+    </style>
+    <div class="dlgWrap">
+      <div class="dlgHead">
+        <div class="dlgTitle" id="downloadTitle">----- Download here ---- </div>
+        <button class="closeBtn" aria-label="Close" onclick="downloadDialog.close()">×</button>
+      </div>
+      <div class="Canvas">
+        <!-- ⬅️ EDIT: Replace with your real store URLs -->
+        <a class="store" href="https://m.galaxyworld999.com/" target="_blank" rel="noopener noreferrer">Android</a>
+        <a class="store" href="https://m.galaxyworld999.com/" target="_blank" rel="noopener noreferrer">iOS</a>
+      </div>
+      <div class="hr" style="margin-top:14px"></div>
+      <div style="padding:0 4px 12px 4px;color:var(--muted);font-size:12px;text-align:center">Links open in a new tab.</div>
+    </div>
+  </dialog>
+
+  <span class="sr-only" aria-live="polite" id="a11yLive"></span>
+
+  <script>
+    /* =========================================================
+       INTERACTIVE BACKGROUND — STARS + PARALLAX PLANETS
+       - Lightweight Canvas 2D starfield w/ depth & parallax
+       - Mouse/touch/gyro parallax for .planet elements
+       - Respects prefers-reduced-motion
+    ========================================================== */
+    const canvas = document.getElementById('starsCanvas');
+    const ctx = canvas.getContext('2d', { alpha: true });
+    let stars = [];
+    let w=0,h=0, dpr=Math.min(window.devicePixelRatio||1, 2);
+    let motionOK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function resize(){
+      w = canvas.width = Math.floor(innerWidth * dpr);
+      h = canvas.height = Math.floor(innerHeight * dpr);
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+      initStars();
+    }
+
+    function initStars(){
+      const count = Math.floor((innerWidth*innerHeight)/900); // density
+      stars = [];
+      for(let i=0;i<count;i++){
+        stars.push({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          z: Math.random()*1 + 0.2, // depth 0.2—1.2
+          a: Math.random()*0.8 + 0.2,
+          r: Math.random()*1.6 + 0.2
+        });
+      }
+    }
+
+    let parallax = { x:0, y:0, targetX:0, targetY:0 };
+    function onPointer(e){
+      const cx = innerWidth/2, cy = innerHeight/2;
+      const px = ( (e.clientX ?? (e.touches?.[0]?.clientX||cx)) - cx ) / cx;
+      const py = ( (e.clientY ?? (e.touches?.[0]?.clientY||cy)) - cy ) / cy;
+      parallax.targetX = px; parallax.targetY = py;
+    }
+    window.addEventListener('mousemove', onPointer, {passive:true});
+    window.addEventListener('touchmove', onPointer, {passive:true});
+
+    // Optional: device orientation parallax
+    window.addEventListener('deviceorientation', (e)=>{
+      if(!e.beta && !e.gamma) return;
+      const px = (e.gamma||0) / 45; // -45..45
+      const py = (e.beta||0) / 45;  // 0..90
+      parallax.targetX = px; parallax.targetY = py;
+    });
+
+    function render(){
+      // ease parallax
+      parallax.x += (parallax.targetX - parallax.x) * 0.05;
+      parallax.y += (parallax.targetY - parallax.y) * 0.05;
+
+      ctx.clearRect(0,0,w,h);
+
+      // subtle gradient glow
+      const grad = ctx.createRadialGradient(w*0.2, h*0.1, 0, w*0.2, h*0.1, Math.max(w,h)*0.9);
+      grad.addColorStop(0, 'rgba(0,255,255,0.06)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,w,h);
+
+      // draw stars with depth parallax and twinkle
+      const time = performance.now() * 0.001;
+      for(const s of stars){
+        const depthShiftX = parallax.x * 30 * (1.2 - s.z);
+        const depthShiftY = parallax.y * 30 * (1.2 - s.z);
+        const x = s.x + depthShiftX*dpr;
+        const y = s.y + depthShiftY*dpr;
+        const tw = (Math.sin(time*2 + s.x*0.01 + s.y*0.01)*0.5+0.5) * 0.35 + 0.65;
+
+        ctx.globalAlpha = s.a * tw;
+        ctx.beginPath();
+        ctx.arc(x, y, s.r*dpr, 0, Math.PI*2);
+        // subtle color shift by depth
+        const c = s.z<0.6 ? 'rgba(170,247,255,1)' : s.z<0.9 ? 'rgba(196,170,255,1)' : 'rgba(255,156,249,1)';
+        ctx.fillStyle = c;
+        ctx.fill();
+      }
+
+      // move planets (CSS positioned) using transform for parallax
+      const planets = document.querySelectorAll('.planet');
+      planets.forEach(p=>{
+        const depth = parseFloat(p.dataset.depth||0.2);
+        const x = -parallax.x * 20 * depth;
+        const y = -parallax.y * 20 * depth;
+        p.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      });
+
+      if(motionOK) requestAnimationFrame(render);
+    }
+
+    resize();
+    window.addEventListener('resize', resize, {passive:true});
+    if(motionOK) requestAnimationFrame(render);
+
+    /* =========================================================
+       CTA DIALOG
+    ========================================================== */
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadDialog = document.getElementById('downloadDialog');
+    const a11yLive = document.getElementById('a11yLive');
+
+    downloadBtn.addEventListener('click', ()=>{
+      if(typeof downloadDialog.showModal === 'function'){
+        downloadDialog.showModal();
+        a11yLive.textContent = 'Download dialog opened. Choose Android or iOS.';
+      }else{
+        // Fallback: simply navigate to a landing choice (Android by default)
+        window.open('https://play.google.com/store/apps/details?id=your.app.id','_blank'); // ⬅️ EDIT default
+      }
+    });
+
+    // Close dialog on ESC
+    downloadDialog?.addEventListener('cancel', ()=> a11yLive.textContent = 'Dialog closed');
+
+    // Year stamp
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* =========================================================
+       QUICK EDIT GUIDE (also see ⬅️ comments in HTML above)
+       - Change display name: header .brand (MoMoneySweeps)
+       - Change phone: header .contact -> 843-474-8911
+       - Change app name: .title (GW-999)
+       - Change tagline: .tag
+       - Change store links: dialog <a.store href="...">
+       - Color/FX: tweak :root tokens or planet gradients
+    ========================================================== */
+  </script>
+</body>
+</html>
